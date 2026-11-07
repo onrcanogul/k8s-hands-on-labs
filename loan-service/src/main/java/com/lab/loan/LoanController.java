@@ -76,10 +76,10 @@ public class LoanController {
 
         // Installment must not exceed 50% of monthly income
         BigDecimal maxInstallment = c.monthlyIncome().multiply(new BigDecimal("0.5"));
-        if (installment.compareTo(maxInstallment) > 0) {
+        if (installment.compareTo(maxInstallment) > 0)
             return new LoanOffer(c.id(), c.name(), false, "Installment exceeds 50% of income",
                     amount, termMonths, ratePercent, installment, hostname, c.servedBy());
-        }
+
 
         return new LoanOffer(c.id(), c.name(), true, "Approved",
                 amount, termMonths, ratePercent, installment, hostname, c.servedBy());

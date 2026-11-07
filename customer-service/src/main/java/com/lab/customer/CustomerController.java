@@ -34,9 +34,7 @@ public class CustomerController {
     public ResponseEntity<Customer> get(@PathVariable long id) {
         log.info("GET /customers/{} (pod={})", id, hostname);
         Customer c = CUSTOMERS.get(id);
-        if (c == null) {
-            return ResponseEntity.notFound().build();
-        }
+        if (c == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(new Customer(c.id(), c.name(), c.creditScore(), c.monthlyIncome(), hostname));
     }
 }
