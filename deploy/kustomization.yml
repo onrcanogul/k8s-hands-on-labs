@@ -10,4 +10,4 @@ images:
   newTag: 88967d30ec56e291f390cfcae2e8c7dd932874ad
 - name: loan-service
   newName: ghcr.io/onrcanogul/loan-service
-  newTag: "0.2"
+  newTag: d2c11f97cfb999320cf198d9b546dd5107fe94ca
