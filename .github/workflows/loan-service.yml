@@ -40,9 +40,14 @@ jobs:
 
       - name: Bump image tag in deploy/
         run: |
-          cd deploy
-          kustomize edit set image $SERVICE=$IMAGE:${{ github.sha }}
           git config user.name  "ci-bot"
           git config user.email "ci-bot@users.noreply.github.com"
-          git commit -am "deploy: $SERVICE ${GITHUB_SHA::7}"
-          git pull --rebase && git push
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main         
+            (cd deploy && kustomize edit set image $SERVICE=$IMAGE:${{ github.sha }})
+            git commit -am "deploy: $SERVICE ${GITHUB_SHA::7}" || exit 0  
+            git push origin HEAD:main && exit 0
+            sleep $((RANDOM % 5 + 2))
+          done
+          exit 1
