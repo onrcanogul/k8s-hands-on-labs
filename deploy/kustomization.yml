@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: lab
+resources:
+  - customer-service.yml
+  - loan-service.yml
+images:
+  - name: customer-service
+    newName: ghcr.io/onrcanogul/customer-service
+    newTag: "0.1"
+  - name: loan-service
+    newName: ghcr.io/onrcanogul/loan-service
+    newTag: "0.2"

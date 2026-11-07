@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loan-service
+  namespace: lab
+  labels: { app: loan-service }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: loan-service }
+  template:
+    metadata:
+      labels: { app: loan-service }
+    spec:
+      containers:
+        - name: loan-service
+          image: loan-service:0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: loan-config
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:MaxRAMPercentage=70"
+          resources:
+            requests: { cpu: 250m, memory: 384Mi }
+            limits:   { memory: 512Mi }
+          startupProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loan-service
+  namespace: lab
+spec:
+  type: ClusterIP
+  selector: { app: loan-service }
+  ports:
+    - port: 80
+      targetPort: 8080
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loan-config
+  namespace: lab
+data:
+  CUSTOMER_SERVICE_URL: "http://customer-service"
+  CUSTOMER_SERVICE_TIMEOUT_MS: "2000"
+  LOGGING_LEVEL_COM_LAB: "INFO"

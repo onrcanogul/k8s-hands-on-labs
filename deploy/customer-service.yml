@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-service
+  namespace: lab
+  labels: { app: customer-service }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: customer-service }
+  template:
+    metadata:
+      labels: { app: customer-service }
+    spec:
+      containers:
+        - name: customer-service
+          image: customer-service:0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:MaxRAMPercentage=70"
+          resources:
+            requests: { cpu: 250m, memory: 384Mi }
+            limits: { memory: 512Mi }
+          startupProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            periodSeconds: 2
+            failureThreshold: 5
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 2
+            failureThreshold: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+  namespace: lab
+spec:
+  type: ClusterIP
+  selector: { app: customer-service }
+  ports:
+    - port: 80
+      targetPort: 8080
